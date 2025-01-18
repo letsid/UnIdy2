@@ -1,6 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Drawing;
+using System.Numerics; // Use System.Numerics.Vector2
+using System.Runtime.InteropServices;
 using System.Threading;
-using SharpDX;
 
 namespace UnIdy.Utils
 {
@@ -22,37 +24,25 @@ namespace UnIdy.Utils
         public const int MOUSEEVENTF_RIGHTUP = 0x0010;
         public const int MOUSE_EVENT_WHEEL = 0x800;
 
-        // 
         private const int MOVEMENT_DELAY = 10;
-
         private const int CLICK_DELAY = 1;
-
 
         /// <summary>
         /// Sets the cursor position relative to the game window.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="gameWindow"></param>
-        /// <returns></returns>
         public static bool SetCursorPos(int x, int y, RectangleF gameWindow)
         {
-            return SetCursorPos(x + (int) gameWindow.X, y + (int) gameWindow.Y);
+            return SetCursorPos(x + (int)gameWindow.X, y + (int)gameWindow.Y);
         }
 
         /// <summary>
         /// Sets the cursor position to the center of a given rectangle relative to the game window
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="gameWindow"></param>
-        /// <returns></returns>
-        public static bool SetCurosPosToCenterOfRec(RectangleF position, RectangleF gameWindow)
+        public static bool SetCursorPosToCenterOfRec(RectangleF position, RectangleF gameWindow)
         {
-            return SetCursorPos((int) (gameWindow.X + position.Center.X),
-                (int) (gameWindow.Y + position.Center.Y));
+            return SetCursorPos((int)(gameWindow.X + position.X + position.Width / 2),
+                                (int)(gameWindow.Y + position.Y + position.Height / 2));
         }
-        ////////////////////////////////////////////////////////////
-
 
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT
@@ -69,7 +59,6 @@ namespace UnIdy.Utils
         /// <summary>
         /// Retrieves the cursor's position, in screen coordinates.
         /// </summary>
-        /// <see>See MSDN documentation for further information.</see>
         [DllImport("user32.dll")]
         public static extern bool GetCursorPos(out POINT lpPoint);
 
@@ -100,19 +89,25 @@ namespace UnIdy.Utils
             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
         }
 
+        /// <summary>
+        /// Sets the cursor position and performs a left click.
+        /// </summary>
         public static void SetCursorPosAndLeftClick(Vector2 pos, int extraDelay, Vector2 offset)
         {
-            var posX = (int) (pos.X + offset.X);
-            var posY = (int) (pos.Y + offset.Y);
+            var posX = (int)(pos.X + offset.X);
+            var posY = (int)(pos.Y + offset.Y);
             SetCursorPos(posX, posY);
             Thread.Sleep(MOVEMENT_DELAY + extraDelay);
             LeftClick();
         }
 
+        /// <summary>
+        /// Sets the cursor position and performs a right click.
+        /// </summary>
         public static void SetCursorPosAndRightClick(Vector2 pos, int extraDelay, Vector2 offset)
         {
-            var posX = (int) (pos.X + offset.X);
-            var posY = (int) (pos.Y + offset.Y);
+            var posX = (int)(pos.X + offset.X);
+            var posY = (int)(pos.Y + offset.Y);
             SetCursorPos(posX, posY);
             Thread.Sleep(MOVEMENT_DELAY + extraDelay);
             RightClick();
