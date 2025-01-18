@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics; // For Vector2
 using System.Threading;
 using System.Windows.Forms;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.Elements.InventoryElements;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared.Enums;
-using SharpDX;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.Elements.InventoryElements;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared.Enums;
 using UnIdy.Utils;
+using System.Drawing; // For Color
 
 namespace UnIdy
 {
@@ -28,7 +29,8 @@ namespace UnIdy
             Name = "UnIdy";
 
             _ingameState = GameController.Game.IngameState;
-            _windowOffset = GameController.Window.GetWindowRectangle().TopLeft;
+            var windowRectangle = GameController.Window.GetWindowRectangle();
+            _windowOffset = new Vector2(windowRectangle.TopLeft.X, windowRectangle.TopLeft.Y);
             return true;
         }
 
@@ -60,11 +62,10 @@ namespace UnIdy
             {
                 foreach (var normalStashItem in _ingameState.IngameUi.StashElement.VisibleStash.VisibleInventoryItems)
                 {
-                    normalInventoryItems.Insert(normalInventoryItems.Count,normalStashItem);
+                    normalInventoryItems.Insert(normalInventoryItems.Count, normalStashItem);
                 }
             }
 
-            var latency = (int)_ingameState.CurLatency;
             var listOfNormalInventoryItemsToIdentify = new List<NormalInventoryItem>();
 
             foreach (var normalInventoryItem in normalInventoryItems)
@@ -116,7 +117,8 @@ namespace UnIdy
             }
 
             Mouse.SetCursorPosAndRightClick(scrollOfWisdom.GetClientRect().Center, Settings.ExtraDelay, _windowOffset);
-            Thread.Sleep(latency);
+            Thread.Sleep(200);
+
             Keyboard.KeyDown(Keys.LShiftKey);
             foreach (var normalInventoryItem in listOfNormalInventoryItemsToIdentify)
             {
@@ -125,7 +127,12 @@ namespace UnIdy
                     Graphics.DrawFrame(normalInventoryItem.GetClientRect(), Color.AliceBlue, 2);
                 }
 
-                Mouse.SetCursorPosAndLeftClick(normalInventoryItem.GetClientRect().Center, Settings.ExtraDelay.Value, _windowOffset);
+                Mouse.SetCursorPosAndLeftClick(
+                    new Vector2(normalInventoryItem.GetClientRect().Center.X, normalInventoryItem.GetClientRect().Center.Y), 
+                    Settings.ExtraDelay.Value, 
+                    _windowOffset
+                );
+
                 Thread.Sleep(Constants.WHILE_DELAY + Settings.ExtraDelay.Value);
             }
             Keyboard.KeyUp(Keys.LShiftKey);
